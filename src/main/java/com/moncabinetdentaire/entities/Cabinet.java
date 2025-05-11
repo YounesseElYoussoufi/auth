@@ -21,7 +21,12 @@ public class Cabinet {
     private String adresse;
     private String telephone;
     private String email;
+    private String horaireTravail;
 
     @OneToMany(mappedBy = "cabinet")
     private List<User> users;
+
+    @OneToMany(mappedBy = "cabinet")
+    private List<RendezVous> rendezVousList;
+
 }

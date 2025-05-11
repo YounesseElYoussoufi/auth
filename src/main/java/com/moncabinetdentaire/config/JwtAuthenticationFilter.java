@@ -2,7 +2,8 @@ package com.moncabinetdentaire.config;
 
 
 
-import com.moncabinetdentaire.services.jwt.UserService;
+
+import com.moncabinetdentaire.service.jwt.UserService;
 import com.moncabinetdentaire.utils.JwtUtil;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;

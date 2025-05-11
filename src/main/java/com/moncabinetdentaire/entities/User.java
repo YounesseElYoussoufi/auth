@@ -96,5 +96,12 @@ public class User implements UserDetails {
         return userDto;
 
     }
+
+    @ManyToOne
+    private Cabinet cabinet;
+
+    @OneToMany(mappedBy = "user")
+    private List<RendezVous> rendezVousList;
+
 }
 

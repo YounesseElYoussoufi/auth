@@ -7,7 +7,8 @@ import com.moncabinetdentaire.dto.UserDto;
 import com.moncabinetdentaire.entities.User;
 import com.moncabinetdentaire.repositories.UserRepositories;
 import com.moncabinetdentaire.service.auth.AuthService;
-import com.moncabinetdentaire.services.jwt.UserService;
+
+import com.moncabinetdentaire.service.jwt.UserService;
 import com.moncabinetdentaire.utils.JwtUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -33,6 +34,23 @@ public class AuthController {
     private final UserService userService;
     private final AuthenticationManager authenticationManager;
 
+    // Récupérer tous les utilisateurs
+    @GetMapping("/users")
+    public ResponseEntity<?> getAllUsers() {
+        try {
+            var users = userRepository.findAll();
+
+            if (users.isEmpty()) {
+                return ResponseEntity.status(HttpStatus.NO_CONTENT).body("Aucun utilisateur trouvé");
+            }
+
+            return ResponseEntity.ok(users);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Erreur lors de la récupération des utilisateurs");
+        }
+    }
+
+    // Inscription d'un nouvel utilisateur
     @PostMapping("/signup")
     public ResponseEntity<?> signupUser(@RequestBody SignupRequest signupRequest) {
         if (authService.hasUserWithEmail(signupRequest.getEmail())) {
@@ -45,6 +63,7 @@ public class AuthController {
         return ResponseEntity.status(HttpStatus.CREATED).body(createdUserDto);
     }
 
+    // Connexion d'un utilisateur
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody AuthenticationRequest authenticationRequest) {
         try {
@@ -67,5 +86,39 @@ public class AuthController {
         }
 
         return ResponseEntity.ok(authenticationResponse);
+    }
+
+    // Modifier un utilisateur
+    @PutMapping("/users/{userId}")
+    public ResponseEntity<?> editUser(@PathVariable Long userId, @RequestBody UserDto userDto) {
+        Optional<User> userOptional = userRepository.findById(userId);
+
+        if (userOptional.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Utilisateur non trouvé");
+        }
+
+        User user = userOptional.get();
+        user.setName(userDto.getName());
+        user.setEmail(userDto.getEmail());
+        user.setUserRole(userDto.getUserRole());
+        // Mettez à jour d'autres champs nécessaires ici
+
+        userRepository.save(user);
+
+        return ResponseEntity.ok("Utilisateur mis à jour avec succès");
+    }
+
+    // Supprimer un utilisateur
+    @DeleteMapping("/users/{userId}")
+    public ResponseEntity<?> deleteUser(@PathVariable Long userId) {
+        Optional<User> userOptional = userRepository.findById(userId);
+
+        if (userOptional.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Utilisateur non trouvé");
+        }
+
+        userRepository.deleteById(userId);
+
+        return ResponseEntity.ok("Utilisateur supprimé avec succès");
     }
 }

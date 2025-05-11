@@ -1,7 +1,8 @@
 package com.moncabinetdentaire.config;
 
 import com.moncabinetdentaire.enums.UserRole;
-import com.moncabinetdentaire.services.jwt.UserService;
+
+import com.moncabinetdentaire.service.jwt.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -31,33 +32,30 @@ public class WebSecurityConfiguration {
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
     private final UserService userService;
 
+
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-        http.csrf(AbstractHttpConfigurer::disable)
+        http
+                .csrf(AbstractHttpConfigurer::disable)
+                .cors(cors -> {}) // <-- Active la configuration CORS
                 .authorizeHttpRequests(request -> request
-                        .requestMatchers("/swagger-ui.html").permitAll() // Allow access to Swagger UI
+                        .requestMatchers("/swagger-ui.html").permitAll()
                         .requestMatchers("/swagger-ui/**").permitAll()
                         .requestMatchers("/v3/api-docs/**").permitAll()
-                        .requestMatchers("/h2-console/**").permitAll() // Allow access to H2 console
+                        .requestMatchers("/h2-console/**").permitAll()
                         .requestMatchers("/api/auth/**").permitAll()
-                        .requestMatchers("/api/admin/**").hasAuthority(UserRole.ADMIN.name())
-
-/*
-
- */
-
-
-                        .anyRequest().authenticated())
+                        .requestMatchers("/api/cabinets/**").permitAll()
+                        .anyRequest().authenticated()
+                )
                 .sessionManagement(manager -> manager.sessionCreationPolicy(STATELESS))
                 .authenticationProvider(authenticationProvider())
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
-        // Correctly disable frame options
-        http.headers(headers -> headers.addHeaderWriter(new XFrameOptionsHeaderWriter(XFrameOptionsHeaderWriter.XFrameOptionsMode.SAMEORIGIN)));
+        http.headers(headers -> headers
+                .addHeaderWriter(new XFrameOptionsHeaderWriter(XFrameOptionsHeaderWriter.XFrameOptionsMode.SAMEORIGIN)));
 
         return http.build();
     }
-
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();

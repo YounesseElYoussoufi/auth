@@ -2,7 +2,7 @@ package com.moncabinetdentaire.enums;
 
 public enum UserRole {
     ADMIN,
-    DENTISTE ,
+    CABINET_DENTAIRE,
     SECRETAIRE,
     PATIENT
 
